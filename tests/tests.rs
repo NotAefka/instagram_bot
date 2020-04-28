@@ -1,17 +1,9 @@
-#![allow(unused_must_use)]
-
-use std::panic::catch_unwind;
-
 use log::info;
 
 use lw_webdriver::{enums::*, session::*};
 
 #[test]
 fn navigation() {
-    catch_unwind(|| {
-        env_logger::init();
-    });
-
     for i in 0..2 {
         let mut session = match i {
             0 => {
@@ -52,10 +44,6 @@ fn navigation() {
 
 #[test]
 fn tabs() {
-    catch_unwind(|| {
-        env_logger::init();
-    });
-
     for i in 0..2 {
         let mut session = match i {
             0 => {
@@ -92,10 +80,6 @@ fn tabs() {
 
 #[test]
 fn timeouts() {
-    catch_unwind(|| {
-        env_logger::init();
-    });
-
     for i in 0..2 {
         let mut session = match i {
             0 => {
@@ -128,10 +112,6 @@ fn timeouts() {
 
 #[test]
 fn elements() {
-    catch_unwind(|| {
-        env_logger::init();
-    });
-
     for i in 0..2 {
         let mut session = match i {
             0 => {
@@ -144,7 +124,7 @@ fn elements() {
             }
         };
 
-        session.open_tab();
+        let _ = session.open_tab();
         session.tabs[0]
             .navigate("https://www.mozilla.org/fr/")
             .unwrap();
@@ -176,10 +156,6 @@ fn elements() {
 
 #[test]
 fn execute_javascript() {
-    catch_unwind(|| {
-        env_logger::init();
-    });
-
     for i in 0..2 {
         let mut session = match i {
             0 => {
@@ -205,10 +181,6 @@ fn execute_javascript() {
 
 #[test]
 fn element_obscured() {
-    catch_unwind(|| {
-        env_logger::init();
-    });
-
     for i in 0..2 {
         let mut session = match i {
             0 => {

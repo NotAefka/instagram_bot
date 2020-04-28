@@ -84,15 +84,15 @@ impl Session {
     /// let mut session = Session::new(Browser::Firefox, false).unwrap();
     /// ```
     pub fn new(browser: Browser, headless: bool) -> Result<Self, WebdriverError> {
-        info! {"Creating a session..."};
+        info!("Creating a session...");
         let result = Session::new_session(browser, headless);
 
         if let Err(WebdriverError::FailedRequest) = result {
             warn!("No webdriver launched.");
             if cfg!(unix) {
                 let command = match browser {
-                    Browser::Firefox => "geckodriver",
-                    Browser::Chrome => "chromedriver",
+                    Browser::Firefox => "./geckodriver",
+                    Browser::Chrome => "./chromedriver",
                 };
 
                 info!("Launching {}...", command);
@@ -161,6 +161,7 @@ impl Session {
 
         // Send request
         let session_id = new_session(&serde_json::to_string(&post_data).unwrap())?;
+
         let mut session = Session {
             id: Rc::new(session_id),
             tabs: Vec::new(),

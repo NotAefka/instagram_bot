@@ -14,12 +14,12 @@ fn handle_response(result: MinReqResult) -> Result<Value, WebdriverError> {
                 Ok(json) => {
                     let error_value = &json["value"]["error"];
 
-                    if !error_value.is_string() {
-                        Ok(json)
-                    } else {
+                    if error_value.is_string() {
                         let webdriver_error = WebdriverError::from(error_value.to_string());
                         error!("{:?}, response: {}", webdriver_error, json);
                         Err(webdriver_error)
+                    } else {
+                        Ok(json)
                     }
                 }
                 Err(err) => {
