@@ -1,61 +1,47 @@
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Selector {
     Css,
     XPath,
     TagName,
     LinkText,
-    PartialLinkText
+    PartialLinkText,
 }
 
-impl Selector {
-    pub fn to_string(self) -> &'static str {
-        match self {
+impl From<Selector> for &'static str {
+    fn from(selector: Selector) -> &'static str {
+        match selector {
             Selector::Css => "css selector",
             Selector::XPath => "xpath",
             Selector::TagName => "tag name",
             Selector::LinkText => "link text",
-            Selector::PartialLinkText => "partial link text"
+            Selector::PartialLinkText => "partial link text",
         }
     }
 }
 
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Browser {
     Firefox,
-    Chrome
+    Chrome,
 }
 
-impl Browser {
-    pub fn to_string(self) -> &'static str {
-        match self {
+impl From<Browser> for &'static str {
+    fn from(browser: Browser) -> &'static str {
+        match browser {
             Browser::Firefox => "firefox",
-            Browser::Chrome => "chrome"
+            Browser::Chrome => "chrome",
         }
     }
 }
 
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub enum Platform {
     Linux,
     Windows,
-    Unknow
+    Unknow,
 }
 
 impl Platform {
-    pub fn to_string(self) -> &'static str {
-        match self {
-            Platform::Linux => "linux",
-            Platform::Windows => "windows",
-            Platform::Unknow => "unknow"
-        }
-    }
-
     pub fn current() -> Platform {
         if cfg!(unix) {
             Platform::Linux
@@ -63,6 +49,16 @@ impl Platform {
             Platform::Windows
         } else {
             Platform::Unknow
+        }
+    }
+}
+
+impl From<Platform> for &'static str {
+    fn from(platform: Platform) -> &'static str {
+        match platform {
+            Platform::Linux => "linux",
+            Platform::Windows => "windows",
+            Platform::Unknow => "unknow",
         }
     }
 }

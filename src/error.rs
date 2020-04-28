@@ -1,6 +1,4 @@
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum WebdriverError {
     UnsupportedPlatform,
     FailedRequest,
@@ -32,11 +30,11 @@ pub enum WebdriverError {
     UnknowError,
     UnknowMethod,
     UnsupportedOperation,
-    Custom(String)
+    Custom(String),
 }
 
-impl WebdriverError {
-    pub fn from(error: String) -> Self {
+impl From<String> for WebdriverError {
+    fn from(error: String) -> Self {
         match error.as_str() {
             "element click intercepted" => WebdriverError::ElementClickIntercepted,
             "element not interactable" => WebdriverError::ElementNotInteractable,
