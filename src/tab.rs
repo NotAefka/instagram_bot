@@ -1,37 +1,33 @@
 //! Tabs allow you to control elements
 
-use json::*;
-use std::result::Result;
-use crate::elements::*;
-use crate::session::*;
-use crate::enums::*;
-use crate::error::*;
-use log::{info, error};
-use crate::elements::Element;
-use std::rc::Rc;
-use crate::http_requests::{get_selected_tab, select_tab, navigate, close_active_tab, find_element,
-    get_active_tab_url, get_active_tab_title, back, forward, refresh, execute_script_sync, get_all_cookies, set_cookie, get_page_source};
+use std::{rc::Rc, result::Result, unimplemented};
+
+use serde_json::Value;
+
+use crate::{elements::Element, enums::*, error::*, http_requests::*, session::*};
 
 /// Tabs are used to load a site and get informations.
-/// 
+///
 /// ```rust
 /// # use lw_webdriver::{session::Session, enums::Browser};
-/// 
+///
 /// let mut session = Session::new(Browser::Firefox, false).unwrap();
-/// 
+///
 /// // using the default tab
 /// session.tabs[0].navigate("https://www.mozilla.org/fr/").unwrap();
 /// ```
 pub struct Tab {
     pub(crate) id: Rc<String>,
-    pub(crate) session_id: Rc<String>
+    pub(crate) session_id: Rc<String>,
+    pub(crate) close_on_drop: bool,
 }
 
 impl Tab {
-    pub fn new_from(id: String, session_id: Rc<String>) -> Tab {
+    pub fn new_from(id: String, session_id: Rc<String>, close_on_drop: bool) -> Tab {
         Tab {
             id: Rc::new(id),
-            session_id
+            session_id,
+            close_on_drop
         }
     }
 
@@ -41,9 +37,9 @@ impl Tab {
 
     /// Create a new tab in a session.
     /// This return an immutable reference (in a Result) because the tab is stored in the session.
-    pub fn new(session: &mut Session) -> Result<&Tab, WebdriverError> {
-        let tab_id = session.open_tab()?;
-        Ok(&session.tabs[tab_id])
+    pub fn new(session: &mut Session) -> Result<Tab, WebdriverError> {
+        let tab = session.open_tab()?;
+        Ok(tab)
     }
 
     /// Select this tab.
@@ -67,19 +63,22 @@ impl Tab {
     }
 
     /// Find an element in the tab, selected by a [Selector](../enums/enum.Selector.html).
-    pub fn find(&mut self, selector: Selector, tofind: &str) -> Result<Option<Element>, WebdriverError> {
+    pub fn find(
+        &mut self,
+        _selector: Selector,
+        _tofind: &str,
+    ) -> Result<Option<Element>, WebdriverError> {
         self.select()?;
-        match find_element(&self.session_id, selector, &tofind) {
-            Ok(id) => {
-                Ok(Some(Element::new(id, Rc::clone(&self.session_id), Rc::clone(&self.id))))
-            },
-            Err(error) if error == WebdriverError::NoSuchElement => {
-                Ok(None)
-            },
-            Err(error) => {
-                return Err(error)
-            }
-        }
+        unimplemented!()
+        /*match find_element(&self.session_id, &selector, &tofind) {
+            Ok(id) => Ok(Some(Element::new(
+                id,
+                Rc::clone(&self.session_id),
+                Rc::clone(&self.id),
+            ))),
+            Err(WebdriverError::NoSuchElement) => Ok(None),
+            Err(error) => Err(error),
+        }*/
     }
 
     /// Return the url of the current web page.
@@ -112,22 +111,33 @@ impl Tab {
         refresh(&self.session_id)
     }
 
-    pub fn execute_script(&self, script: &str, args: Vec<JsonValue>) -> Result<(), WebdriverError> {
+    pub fn execute_script(&self, script: &str, args: Vec<Value>) -> Result<(), WebdriverError> {
         self.select()?;
         execute_script_sync(&self.session_id, script, args)
     }
 
-    pub fn get_cookies(&self) -> Result<Vec<(String, usize, bool, String, String, bool, String)>, WebdriverError> {
+    pub fn switch_to_parent_frame(&self) -> Result<(), WebdriverError> {
+        self.select()?;
+        switch_to_parent_frame(&self.session_id)
+    }
+
+    pub fn get_cookies(&self) -> Result<Vec<Cookie>, WebdriverError> {
         self.select()?;
         get_all_cookies(&self.session_id)
     }
 
-    pub fn set_cookie(&self, cookie: (String, usize, bool, String, String, bool, String)) -> Result<(), WebdriverError> {
+    pub fn set_cookie(
+        &self,
+        cookie: Cookie,
+    ) -> Result<(), WebdriverError> {
         self.select()?;
         set_cookie(&self.session_id, cookie)
     }
 
-    pub fn set_cookies(&self, cookies: Vec<(String, usize, bool, String, String, bool, String)>) -> Result<(), WebdriverError> {
+    pub fn set_cookies(
+        &self,
+        cookies: Vec<Cookie>,
+    ) -> Result<(), WebdriverError> {
         self.select()?;
         for cookie in cookies {
             set_cookie(&self.session_id, cookie)?
@@ -137,7 +147,7 @@ impl Tab {
 
     pub fn get_page_source(&self) -> Result<String, WebdriverError> {
         self.select()?;
-        get_page_source(&self.session_id)
+        unimplemented!()
     }
 }
 
@@ -156,8 +166,10 @@ impl WebdriverObject for Tab {
 impl Drop for Tab {
     #[allow(unused_must_use)]
     fn drop(&mut self) {
-        if let Ok(()) = self.select() {
-            close_active_tab(&self.session_id);
+        if self.close_on_drop {
+            if let Ok(()) = self.select() {
+                close_active_tab(&self.session_id);
+            }
         }
     }
 }

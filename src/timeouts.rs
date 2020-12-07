@@ -1,20 +1,23 @@
-use json::*;
+use serde::{Serialize, Deserialize};
+use serde_json::*;
 
-#[derive(PartialEq)]
-#[derive(Debug)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Timeouts {
+    #[serde(default)]
     pub script: Option<usize>,
-    pub page_load: usize,
-    pub implicit: usize
+    #[serde(default)]
+    #[serde(rename = "pageLoad")]
+    pub page_load: Option<usize>,
+    #[serde(default)]
+    pub implicit: Option<usize>,
 }
 
 impl Timeouts {
-    pub fn to_json(&self) -> json::JsonValue {
-        object! {
-            "script" => self.script,
-            "pageLoad" => self.page_load,
-            "implicit" => self.implicit
-        }
+    pub fn to_json(&self) -> serde_json::Value {
+        json!({
+            "script": self.script,
+            "pageLoad": self.page_load,
+            "implicit": self.implicit
+        })
     }
 }
